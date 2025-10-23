@@ -1,17 +1,28 @@
 import { GoogleGenAI, Modality, GenerateContentResponse, Content } from "@google/genai";
 import type { ChatMessage } from "../types";
 
-// Creates a new AI client for each call to ensure the most recent API key is used,
-// especially important in environments where the key can be selected by the user at runtime.
-const getAiClient = () => {
+// Retrieves the AI client, using the API key from the environment.
+const getAiClient = async () => {
     const apiKey = process.env.API_KEY;
+
     if (!apiKey) {
-        console.error("API_KEY is not available. Please ensure it is set in the environment.");
-        // We throw here to prevent API calls with an undefined key.
-        // The UI should handle this gracefully, e.g., by prompting for a key.
-        throw new Error("API Key not found.");
+        console.error("API Key is not available.");
+        // This error will be caught by the calling components and should be displayed to the user.
+        throw new Error("API Key not found. Please ensure your API key is configured correctly.");
     }
     return new GoogleGenAI({ apiKey });
+};
+
+const fileToImagePart = async (file: File) => {
+  const base64EncodedData = await new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+    reader.readAsDataURL(file);
+  });
+  return {
+    imageBytes: base64EncodedData,
+    mimeType: file.type,
+  };
 };
 
 
@@ -27,7 +38,7 @@ const fileToGenerativePart = async (file: File) => {
 };
 
 export const generateImageFromText = async (prompt: string, aspectRatio: string): Promise<string> => {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const response = await ai.models.generateImages({
         model: 'imagen-4.0-generate-001',
         prompt,
@@ -44,7 +55,7 @@ export const generateImageFromText = async (prompt: string, aspectRatio: string)
 
 
 export const analyzeImageContent = async (imageFile: File, prompt: string): Promise<string> => {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const imagePart = await fileToGenerativePart(imageFile);
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
@@ -54,7 +65,7 @@ export const analyzeImageContent = async (imageFile: File, prompt: string): Prom
 };
 
 export const editImageWithPrompt = async (imageFile: File, prompt: string): Promise<string> => {
-    const ai = getAiClient();
+    const ai = await getAiClient();
     const imagePart = await fileToGenerativePart(imageFile);
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
@@ -86,38 +97,6 @@ export const generateSpriteSheet = async (referenceFile: File, animationPrompt: 
     return results;
 };
 
-
-export const generateVideoFromImage = async (imageFile: File, prompt: string, aspectRatio: '16:9' | '9:16') => {
-    const ai = getAiClient();
-    const base64EncodedDataPromise = new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-        reader.readAsDataURL(imageFile);
-    });
-    const base64Data = await base64EncodedDataPromise;
-
-    let operation = await ai.models.generateVideos({
-        model: 'veo-3.1-fast-generate-preview',
-        prompt,
-        image: {
-            imageBytes: base64Data,
-            mimeType: imageFile.type,
-        },
-        config: {
-            numberOfVideos: 1,
-            resolution: '720p',
-            aspectRatio: aspectRatio
-        }
-    });
-    return operation;
-};
-
-export const checkVideoOperationStatus = async (operation: any) => {
-    const ai = getAiClient();
-    return await ai.operations.getVideosOperation({ operation });
-};
-
-
 // This stateless function sends the entire chat history for context, ensuring that
 // conversation memory is maintained even when switching modes (search, thinking).
 export const sendMessageToChat = async (
@@ -126,7 +105,7 @@ export const sendMessageToChat = async (
     useSearch: boolean,
     useThinking: boolean
 ): Promise<GenerateContentResponse> => {
-    const ai = getAiClient();
+    const ai = await getAiClient();
 
     // Convert our app's message format to the Gemini API's format.
     const contents: Content[] = history.map(msg => ({
@@ -154,4 +133,27 @@ export const sendMessageToChat = async (
         contents: contents,
         config: config
     });
+};
+
+// FIX: Add function to generate video from an image and prompt using the Veo model.
+export const generateVideoFromImage = async (imageFile: File, prompt: string, aspectRatio: '16:9' | '9:16') => {
+    const ai = await getAiClient();
+    const image = await fileToImagePart(imageFile);
+    const operation = await ai.models.generateVideos({
+      model: 'veo-3.1-fast-generate-preview',
+      prompt: prompt,
+      image: image,
+      config: {
+        numberOfVideos: 1,
+        resolution: '720p',
+        aspectRatio: aspectRatio
+      }
+    });
+    return operation;
+};
+
+// FIX: Add function to check the status of a video generation operation.
+export const checkVideoOperationStatus = async (operation: any) => {
+    const ai = await getAiClient();
+    return await ai.operations.getVideosOperation({ operation: operation });
 };

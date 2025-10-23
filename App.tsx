@@ -1,57 +1,18 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { SpriteGenerator } from './components/SpriteGenerator';
 import { ImageEditor } from './components/ImageEditor';
-import { VideoGenerator } from './components/VideoGenerator';
 import { ImageGenerator } from './components/ImageGenerator';
 import { ChatBot } from './components/ChatBot';
 import { ImageAnalyzer } from './components/ImageAnalyzer';
 import { Icon } from './components/Icon';
 import { Button } from './components/common/Button';
+import { VideoGenerator } from './components/VideoGenerator';
 
 type Tab = 'sprite' | 'editor' | 'video' | 'image' | 'chat' | 'analyzer';
 
-// Define the event type for beforeinstallprompt
-interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: string[];
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed';
-    platform: string;
-  }>;
-  prompt(): Promise<void>;
-}
-
-
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('sprite');
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    installPrompt.userChoice.then(choiceResult => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-      setInstallPrompt(null);
-    });
-  };
 
   const renderContent = useCallback(() => {
     switch (activeTab) {
@@ -95,12 +56,6 @@ const App: React.FC = () => {
                     <Icon.Logo className="w-8 h-8 text-sky-400" />
                     <h1 className="text-xl font-bold tracking-tight text-slate-100">Game Sprite AI</h1>
                 </div>
-                 {installPrompt && (
-                  <Button onClick={handleInstallClick} size="sm">
-                    <Icon.Install className="w-4 h-4 mr-2" />
-                    Install App
-                  </Button>
-                )}
             </div>
         </div>
       </header>

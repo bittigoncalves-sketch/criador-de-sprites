@@ -11,7 +11,6 @@ const urlsToCache = [
   '/services/geminiService.ts',
   '/components/SpriteGenerator.tsx',
   '/components/ImageEditor.tsx',
-  '/components/VideoGenerator.tsx',
   '/components/ImageGenerator.tsx',
   '/components/ChatBot.tsx',
   '/components/ImageAnalyzer.tsx',
@@ -36,19 +35,12 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Serve cached content when offline
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        // Not in cache - fetch from network
-        return fetch(event.request);
-      }
-    )
-  );
+  // This is now a "network-only" strategy.
+  // We are not attempting to serve from cache, effectively disabling offline mode for pages.
+  // The browser will handle fetching from the network as usual.
+  // We keep the fetch listener in case we want to add more complex logic later,
+  // but for now, it doesn't intercept with a cache-first strategy.
+  event.respondWith(fetch(event.request));
 });
 
 self.addEventListener('activate', event => {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const BaseIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -29,9 +28,6 @@ export const Icon = {
   Chat: (props: React.SVGProps<SVGSVGElement>) => (
     <BaseIcon {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></BaseIcon>
   ),
-  Key: (props: React.SVGProps<SVGSVGElement>) => (
-    <BaseIcon {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></BaseIcon>
-  ),
   Search: (props: React.SVGProps<SVGSVGElement>) => (
      <BaseIcon {...props} className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></BaseIcon>
   ),
@@ -44,7 +40,7 @@ export const Icon = {
   Download: (props: React.SVGProps<SVGSVGElement>) => (
     <BaseIcon {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></BaseIcon>
   ),
-  Install: (props: React.SVGProps<SVGSVGElement>) => (
-     <BaseIcon {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25" /></BaseIcon>
+  Key: (props: React.SVGProps<SVGSVGElement>) => (
+    <BaseIcon {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></BaseIcon>
   ),
 };
