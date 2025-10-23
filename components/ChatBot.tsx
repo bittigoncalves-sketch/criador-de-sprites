@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { sendMessageToChat, startChat } from '../services/geminiService';
+import { sendMessageToChat } from '../services/geminiService';
 import type { ChatMessage, GroundingSource } from '../types';
 import { Spinner } from './common/Spinner';
 import { Icon } from './Icon';
@@ -14,7 +13,6 @@ export const ChatBot: React.FC = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        startChat();
         setMessages([{
             role: 'model',
             text: "Hello! I'm your AI assistant. How can I help you with your game development today?"
@@ -30,12 +28,16 @@ export const ChatBot: React.FC = () => {
         if (!input.trim() || isLoading) return;
 
         const userMessage: ChatMessage = { role: 'user', text: input };
-        setMessages(prev => [...prev, userMessage]);
+        const newMessages = [...messages, userMessage];
+        setMessages(newMessages);
+        
+        const currentInput = input;
         setInput('');
         setIsLoading(true);
 
         try {
-            const response = await sendMessageToChat(input, useSearch, useThinking);
+            // Pass the up-to-date history (excluding the model's pending response) to the service
+            const response = await sendMessageToChat(newMessages, currentInput, useSearch, useThinking);
             const groundingMetadata = response.candidates?.[0]?.groundingMetadata;
             const sources: GroundingSource[] = groundingMetadata?.groundingChunks
                 ?.map((chunk: any) => chunk.web)

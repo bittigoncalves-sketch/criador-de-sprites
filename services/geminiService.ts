@@ -1,14 +1,19 @@
+import { GoogleGenAI, Modality, GenerateContentResponse, Content } from "@google/genai";
+import type { ChatMessage } from "../types";
 
-import { GoogleGenAI, Modality, GenerateContentResponse } from "@google/genai";
+// Creates a new AI client for each call to ensure the most recent API key is used,
+// especially important in environments where the key can be selected by the user at runtime.
+const getAiClient = () => {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        console.error("API_KEY is not available. Please ensure it is set in the environment.");
+        // We throw here to prevent API calls with an undefined key.
+        // The UI should handle this gracefully, e.g., by prompting for a key.
+        throw new Error("API Key not found.");
+    }
+    return new GoogleGenAI({ apiKey });
+};
 
-// This is a placeholder for the API key. In a real environment, it should be securely managed.
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-    console.warn("API_KEY is not set. Please set the environment variable.");
-}
-
-const getAiClient = () => new GoogleGenAI({ apiKey: API_KEY });
 
 const fileToGenerativePart = async (file: File) => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
@@ -113,40 +118,40 @@ export const checkVideoOperationStatus = async (operation: any) => {
 };
 
 
-let chatInstance: any = null;
-
-export const startChat = () => {
+// This stateless function sends the entire chat history for context, ensuring that
+// conversation memory is maintained even when switching modes (search, thinking).
+export const sendMessageToChat = async (
+    history: ChatMessage[],
+    newMessage: string,
+    useSearch: boolean,
+    useThinking: boolean
+): Promise<GenerateContentResponse> => {
     const ai = getAiClient();
-    chatInstance = ai.chats.create({
-        model: 'gemini-2.5-flash',
-    });
-};
 
-export const sendMessageToChat = async (message: string, useSearch: boolean, useThinking: boolean): Promise<GenerateContentResponse> => {
-    const ai = getAiClient();
-    
+    // Convert our app's message format to the Gemini API's format.
+    const contents: Content[] = history.map(msg => ({
+        role: msg.role,
+        parts: [{ text: msg.text }]
+    }));
+    contents.push({ role: 'user', parts: [{ text: newMessage }] });
+
+
+    let model = 'gemini-2.5-flash';
+    let config: any = {};
+
     if (useThinking) {
-         return ai.models.generateContent({
-            model: 'gemini-2.5-pro',
-            contents: message,
-            config: {
-                thinkingConfig: { thinkingBudget: 32768 }
-            }
-        });
+        model = 'gemini-2.5-pro';
+        config.thinkingConfig = { thinkingBudget: 32768 };
     }
     
     if (useSearch) {
-        return ai.models.generateContent({
-           model: "gemini-2.5-flash",
-           contents: message,
-           config: {
-             tools: [{googleSearch: {}}],
-           },
-        });
+        model = "gemini-2.5-flash";
+        config.tools = [{googleSearch: {}}];
     }
-
-    if (!chatInstance) {
-        startChat();
-    }
-    return await chatInstance.sendMessage({ message });
+    
+    return ai.models.generateContent({
+        model: model,
+        contents: contents,
+        config: config
+    });
 };

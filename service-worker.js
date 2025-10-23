@@ -1,23 +1,42 @@
-
-const CACHE_NAME = 'game-sprite-ai-cache-v1';
+const CACHE_NAME = 'game-sprite-ai-cache-v2'; // Bump version to ensure new worker is installed
 const urlsToCache = [
   '/',
   '/index.html',
-  // Note: External resources like the Tailwind CDN script won't be cached by this simple service worker.
-  // A more complex strategy would be needed for full offline support of external assets.
+  '/manifest.json',
+  '/icon-192.svg',
+  '/icon-512.svg',
+  '/index.tsx',
+  '/App.tsx',
+  '/types.ts',
+  '/services/geminiService.ts',
+  '/components/SpriteGenerator.tsx',
+  '/components/ImageEditor.tsx',
+  '/components/VideoGenerator.tsx',
+  '/components/ImageGenerator.tsx',
+  '/components/ChatBot.tsx',
+  '/components/ImageAnalyzer.tsx',
+  '/components/Icon.tsx',
+  '/components/common/ImageUploader.tsx',
+  '/components/common/Spinner.tsx',
+  '/components/common/Button.tsx'
 ];
 
 self.addEventListener('install', event => {
+  // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('Opened cache and caching assets');
         return cache.addAll(urlsToCache);
+      })
+      .catch(error => {
+        console.error('Failed to cache assets during install:', error);
       })
   );
 });
 
 self.addEventListener('fetch', event => {
+  // Serve cached content when offline
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -25,29 +44,10 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response;
         }
-
-        // Clone the request because it's a stream and can only be consumed once.
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          response => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response because it's also a stream.
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        );
-      })
+        // Not in cache - fetch from network
+        return fetch(event.request);
+      }
+    )
   );
 });
 
@@ -58,6 +58,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
