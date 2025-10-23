@@ -1,17 +1,29 @@
+
 import { GoogleGenAI, Modality, GenerateContentResponse, Content } from "@google/genai";
 import type { ChatMessage } from "../types";
 
-// Retrieves the AI client, using the API key from the environment.
+// Retrieves the AI client, using the API key from the user's browser localStorage.
 const getAiClient = async () => {
-    const apiKey = process.env.API_KEY;
+    // For Video Generation (Veo), a special key selected in the UI is used via process.env.
+    // For all other models, we use the key from localStorage.
+    const apiKey = localStorage.getItem('gemini_api_key');
 
     if (!apiKey) {
-        console.error("API Key is not available.");
-        // This error will be caught by the calling components and should be displayed to the user.
-        throw new Error("API Key not found. Please ensure your API key is configured correctly.");
+        console.error("API Key not found in localStorage.");
+        throw new Error("API Key not set. Please add your key in the settings.");
     }
     return new GoogleGenAI({ apiKey });
 };
+
+const getVeoAiClient = async () => {
+    // Veo uses a specific key selection mechanism provided by the environment.
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        console.error("Veo API Key is not available.");
+        throw new Error("API Key for video generation not found. Please select a key in the Video Gen tab.");
+    }
+    return new GoogleGenAI({ apiKey });
+}
 
 const fileToImagePart = async (file: File) => {
   const base64EncodedData = await new Promise<string>((resolve) => {
@@ -97,8 +109,6 @@ export const generateSpriteSheet = async (referenceFile: File, animationPrompt: 
     return results;
 };
 
-// This stateless function sends the entire chat history for context, ensuring that
-// conversation memory is maintained even when switching modes (search, thinking).
 export const sendMessageToChat = async (
     history: ChatMessage[],
     newMessage: string,
@@ -107,7 +117,6 @@ export const sendMessageToChat = async (
 ): Promise<GenerateContentResponse> => {
     const ai = await getAiClient();
 
-    // Convert our app's message format to the Gemini API's format.
     const contents: Content[] = history.map(msg => ({
         role: msg.role,
         parts: [{ text: msg.text }]
@@ -135,9 +144,8 @@ export const sendMessageToChat = async (
     });
 };
 
-// FIX: Add function to generate video from an image and prompt using the Veo model.
 export const generateVideoFromImage = async (imageFile: File, prompt: string, aspectRatio: '16:9' | '9:16') => {
-    const ai = await getAiClient();
+    const ai = await getVeoAiClient(); // Use Veo-specific client
     const image = await fileToImagePart(imageFile);
     const operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-preview',
@@ -152,8 +160,7 @@ export const generateVideoFromImage = async (imageFile: File, prompt: string, as
     return operation;
 };
 
-// FIX: Add function to check the status of a video generation operation.
 export const checkVideoOperationStatus = async (operation: any) => {
-    const ai = await getAiClient();
+    const ai = await getVeoAiClient(); // Use Veo-specific client
     return await ai.operations.getVideosOperation({ operation: operation });
 };

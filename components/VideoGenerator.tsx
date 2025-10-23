@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { generateVideoFromImage, checkVideoOperationStatus } from '../services/geminiService';
 import { ImageUploader } from './common/ImageUploader';
@@ -108,15 +109,15 @@ export const VideoGenerator: React.FC = () => {
             if (finalOperation?.response?.generatedVideos?.[0]?.video?.uri) {
                 const downloadLink = finalOperation.response.generatedVideos[0].video.uri;
                 
-                // FIX: The API key must be obtained exclusively from the environment variable `process.env.API_KEY`.
-                // The previous implementation using `window.aistudio.getApiKey()` is incorrect.
+                // The API key is now handled by the getVeoAiClient in the service,
+                // which correctly uses the process.env.API_KEY injected by the environment after selection.
                 const apiKey = process.env.API_KEY;
 
                 if (!apiKey) {
-                    throw new Error('API Key is not available to download the video.');
+                    throw new Error('API Key is not available to download the video. Please select a key.');
                 }
 
-                // Append the fetched API key to the download URL
+                // Append the API key to the download URL
                 const response = await fetch(`${downloadLink}&key=${apiKey}`);
                 if (!response.ok) {
                     throw new Error(`Failed to download video: ${response.statusText}`);

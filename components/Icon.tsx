@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const BaseIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -42,5 +43,8 @@ export const Icon = {
   ),
   Key: (props: React.SVGProps<SVGSVGElement>) => (
     <BaseIcon {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></BaseIcon>
+  ),
+  Settings: (props: React.SVGProps<SVGSVGElement>) => (
+    <BaseIcon {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-1.003 1.11-1.226M12 20.25a8.25 8.25 0 100-16.5 8.25 8.25 0 000 16.5zM12 12.75a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5zM14.406 3.94a9.025 9.025 0 010 16.12M19.05 7.5a9.025 9.025 0 010 9M4.95 7.5a9.025 9.025 0 010 9M14.406 20.06c-.09.542-.56 1.003-1.11 1.226M12 3.75a2.25 2.25 0 00-2.25 2.25M9.594 20.06a9.025 9.025 0 01-4.64-12.12M19.05 16.5a9.025 9.025 0 01-4.64 3.56" /></BaseIcon>
   ),
 };
