@@ -1,0 +1,5 @@
+{
+  "name": "Game Sprite Generator AI",
+  "description": "A powerful AI toolkit for game developers and artists. Generate animated sprite sheets from reference images or character names. Also includes features for image editing, image generation, video creation, image analysis, and a smart chatbot with thinking mode and search grounding.",
+  "requestFramePermissions": []
+}

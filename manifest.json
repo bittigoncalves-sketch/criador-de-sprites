@@ -1,0 +1,22 @@
+
+{
+  "short_name": "Sprite AI",
+  "name": "Game Sprite Generator AI",
+  "description": "A powerful AI toolkit for game developers and artists. Generate animated sprite sheets from reference images or character names. Also includes features for image editing, image generation, video creation, image analysis, and a smart chatbot with thinking mode and search grounding.",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "theme_color": "#0f172a"
+}
